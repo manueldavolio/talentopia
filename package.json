@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:cloud": "cross-env CLOUD_BUILD=1 next build",
     "pages:build": "cross-env CLOUD_BUILD=1 npx @cloudflare/next-on-pages && node scripts/cloudflare-postbuild.mjs",
     "cf:dev": "npm run pages:build && wrangler dev",
     "cf:deploy": "npm run pages:build && wrangler deploy",
@@ -32,7 +31,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.107.0",
-    "next": "16.2.7",
+    "next": "15.5.2",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -44,7 +43,7 @@
     "@types/react-dom": "^19",
     "cross-env": "^10.1.0",
     "eslint": "^9",
-    "eslint-config-next": "16.2.7",
+    "eslint-config-next": "15.5.2",
     "tailwindcss": "^4",
     "tsx": "^4.19.4",
     "typescript": "^5",

@@ -13,13 +13,6 @@ const storeFsStubPath = path.join(projectRoot, "src/lib/questions/store.fs.stub.
 const storeFsPath = path.join(projectRoot, "src/lib/questions/store.fs.ts");
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: projectRoot,
-    resolveAlias: {
-      "./store.fs": "./store.fs.stub",
-      "@/lib/questions/store.fs": "./src/lib/questions/store.fs.stub.ts",
-    },
-  },
   webpack: (config) => {
     config.resolve ??= {};
     config.resolve.alias ??= {};
