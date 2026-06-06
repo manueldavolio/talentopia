@@ -17,7 +17,7 @@ export {
   getBankCount,
 } from "@/lib/questions/service";
 export { generateForCategory, CATEGORY_GENERATORS } from "@/lib/questions/generators";
-export { getStoriaTimelineEvents } from "@/lib/questions/generators/history";
+export { getStoriaTimelineEvents } from "@/lib/questions/generators/historyTimeline";
 export { generateFromTemplates, reshuffleQuestion, shuffle } from "@/lib/questions/generator";
 export {
   loadQuestionBank,

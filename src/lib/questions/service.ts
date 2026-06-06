@@ -10,7 +10,7 @@ import {
   ratingFromPlayerLevel,
 } from "@/lib/adaptiveDifficulty";
 import { isTooSimilarToAny } from "@/lib/questions/similarity";
-import { QUESTION_BANK_SLUGS } from "@/lib/questions/categorySlugs";
+import { QUESTION_BANK_SLUGS, isQuestionBankSlug, type QuestionBankSlug } from "@/lib/questions/categorySlugs";
 import { loadQuestionBank } from "@/lib/questions/store";
 import type { CategorySlug, Difficulty, Question } from "@/types";
 
@@ -49,7 +49,7 @@ function filterByDifficulty(
 }
 
 function generateRuntimeBatch(
-  slug: CategorySlug,
+  slug: QuestionBankSlug,
   count: number,
   rating: number
 ): Question[] {
@@ -81,7 +81,7 @@ function passesAntiRepetition(
 }
 
 export interface PickQuestionsOptions {
-  categorySlug: CategorySlug;
+  categorySlug: QuestionBankSlug;
   count: number;
   /** Rating adattivo della categoria (prioritario su playerLevel). */
   categoryRating?: number;
@@ -171,7 +171,7 @@ export function pickQuestionsForQuiz(
   return shuffle(selected);
 }
 
-export function getBankCount(categorySlug: CategorySlug): number {
+export function getBankCount(categorySlug: QuestionBankSlug): number {
   return loadQuestionBank(categorySlug).length;
 }
 

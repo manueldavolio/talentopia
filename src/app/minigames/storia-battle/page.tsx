@@ -6,7 +6,7 @@ import { GameButton } from "@/components/ui/GameButton";
 import { usePlayer } from "@/context/PlayerContext";
 import { XP_MINIGAME_WIN } from "@/lib/constants";
 import { coinsFromXp } from "@/lib/xp";
-import { getStoriaTimelineEvents } from "@/lib/questions/generators/history";
+import { getStoriaTimelineEvents } from "@/lib/questions/generators/historyTimeline";
 import { shuffle } from "@/lib/questions/generator";
 
 export default function StoriaBattlePage() {

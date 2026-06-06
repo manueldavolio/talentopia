@@ -171,7 +171,3 @@ export function generateOneHistoryQuestion(difficulty?: Difficulty): Question {
   return q;
 }
 
-/** Eventi timeline per minigame storia-battle */
-export function getStoriaTimelineEvents() {
-  return timelineEvents;
-}

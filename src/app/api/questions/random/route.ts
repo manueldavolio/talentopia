@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { QUESTION_BANK_SLUGS } from "@/lib/questions/categorySlugs";
+import { isQuestionBankSlug } from "@/lib/questions/categorySlugs";
 import { pickQuestionsForQuiz } from "@/lib/questions/service";
-import type { CategorySlug } from "@/types";
-
-const VALID = QUESTION_BANK_SLUGS as unknown as CategorySlug[];
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const category = searchParams.get("category") as CategorySlug;
+  const category = searchParams.get("category");
   const count = Math.min(
     30,
     Math.max(1, parseInt(searchParams.get("count") || "10", 10))
@@ -41,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  if (!VALID.includes(category)) {
+  if (!category || !isQuestionBankSlug(category)) {
     return NextResponse.json({ error: "Categoria non valida" }, { status: 400 });
   }
 

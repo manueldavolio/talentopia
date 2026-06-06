@@ -10,15 +10,13 @@ import { generateForCategory } from "@/lib/questions/generators";
 import { isAdminAuthorized, unauthorizedResponse } from "@/lib/admin/auth";
 import { parsePatenteCsvRows, parsePatenteXml } from "@/lib/patente/import";
 import { makeId } from "@/lib/questions/generator";
-import { QUESTION_BANK_SLUGS } from "@/lib/questions/categorySlugs";
-import type { CategorySlug, Question } from "@/types";
-
-const VALID = QUESTION_BANK_SLUGS as unknown as CategorySlug[];
+import { isQuestionBankSlug } from "@/lib/questions/categorySlugs";
+import type { Question } from "@/types";
 
 export async function GET(request: NextRequest) {
   if (!isAdminAuthorized(request)) return unauthorizedResponse();
-  const slug = request.nextUrl.searchParams.get("category") as CategorySlug;
-  if (slug && VALID.includes(slug)) {
+  const slug = request.nextUrl.searchParams.get("category");
+  if (slug && isQuestionBankSlug(slug)) {
     const page = parseInt(request.nextUrl.searchParams.get("page") || "1", 10);
     const limit = parseInt(request.nextUrl.searchParams.get("limit") || "50", 10);
     const bank = loadQuestionBank(slug);
@@ -38,8 +36,8 @@ export async function POST(request: NextRequest) {
   const action = body.action as string;
 
   if (action === "add") {
-    const slug = body.categorySlug as CategorySlug;
-    if (!VALID.includes(slug)) {
+    const slug = body.categorySlug as string;
+    if (!isQuestionBankSlug(slug)) {
       return NextResponse.json({ error: "Categoria invalida" }, { status: 400 });
     }
     const q: Question = {
@@ -61,9 +59,9 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "generate") {
-    const slug = body.categorySlug as CategorySlug;
+    const slug = body.categorySlug as string;
     const count = Math.min(2000, Math.max(1, body.count || 100));
-    if (!VALID.includes(slug)) {
+    if (!isQuestionBankSlug(slug)) {
       return NextResponse.json({ error: "Categoria invalida" }, { status: 400 });
     }
     const generated = generateForCategory(slug, count);
@@ -72,9 +70,9 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "import_csv") {
-    const slug = body.categorySlug as CategorySlug;
+    const slug = body.categorySlug as string;
     const rows = body.rows as string[][];
-    if (!VALID.includes(slug) || !Array.isArray(rows)) {
+    if (!isQuestionBankSlug(slug) || !Array.isArray(rows)) {
       return NextResponse.json({ error: "Dati invalidi" }, { status: 400 });
     }
     const questions: Question[] =
@@ -99,7 +97,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "import_xml") {
-    const slug = body.categorySlug as CategorySlug;
+    const slug = body.categorySlug as string;
     const xml = body.xml as string;
     if (slug !== "patente" || typeof xml !== "string") {
       return NextResponse.json({ error: "Import XML solo per patente" }, { status: 400 });
@@ -118,7 +116,10 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   if (!isAdminAuthorized(request)) return unauthorizedResponse();
   const body = await request.json();
-  const slug = body.categorySlug as CategorySlug;
+  const slug = body.categorySlug as string;
+  if (!isQuestionBankSlug(slug)) {
+    return NextResponse.json({ error: "Categoria invalida" }, { status: 400 });
+  }
   const updated = updateQuestionInBank(slug, body.id, body.patch);
   if (!updated) {
     return NextResponse.json({ error: "Domanda non trovata" }, { status: 404 });
@@ -128,9 +129,9 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   if (!isAdminAuthorized(request)) return unauthorizedResponse();
-  const slug = request.nextUrl.searchParams.get("category") as CategorySlug;
+  const slug = request.nextUrl.searchParams.get("category");
   const id = request.nextUrl.searchParams.get("id");
-  if (!slug || !id) {
+  if (!slug || !id || !isQuestionBankSlug(slug)) {
     return NextResponse.json({ error: "Parametri mancanti" }, { status: 400 });
   }
   const ok = deleteQuestionFromBank(slug, id);

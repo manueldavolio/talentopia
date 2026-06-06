@@ -13,3 +13,7 @@ export const QUESTION_BANK_SLUGS = [
 ] as const;
 
 export type QuestionBankSlug = (typeof QUESTION_BANK_SLUGS)[number];
+
+export function isQuestionBankSlug(slug: string): slug is QuestionBankSlug {
+  return (QUESTION_BANK_SLUGS as readonly string[]).includes(slug);
+}

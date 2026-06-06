@@ -35,15 +35,17 @@ const ALL_FACTS = [...footballFacts, ...footballQuickFacts];
 function genFromFact(): Question {
   const f = pickRandom(ALL_FACTS);
   const explanationShort =
-    "explanationShort" in f && f.explanationShort
+    "explanationShort" in f &&
+    typeof f.explanationShort === "string" &&
+    f.explanationShort
       ? f.explanationShort
       : `Regola chiave: ${f.a}.`;
   const curiosity =
-    "curiosity" in f && f.curiosity
+    "curiosity" in f && typeof f.curiosity === "string" && f.curiosity
       ? f.curiosity
       : `Curiosità (${f.topic}): ${f.a}.`;
   const memoryTip =
-    "memoryTip" in f && f.memoryTip
+    "memoryTip" in f && typeof f.memoryTip === "string" && f.memoryTip
       ? f.memoryTip
       : `Ricorda: ${f.a}.`;
   const meta = { explanationShort, curiosity, memoryTip };

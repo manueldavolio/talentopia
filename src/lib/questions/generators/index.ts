@@ -1,4 +1,5 @@
-import type { CategorySlug, Difficulty, Question } from "@/types";
+import type { Difficulty, Question } from "@/types";
+import type { QuestionBankSlug } from "@/lib/questions/categorySlugs";
 import { generateEnglishQuestions, generateOneEnglishQuestion } from "./english";
 import { generateFantasyFootballQuestions, generateOneFantasyFootballQuestion } from "./fantasyFootball";
 import { generateFootballQuestions, generateOneFootballQuestion } from "./football";
@@ -14,10 +15,7 @@ import { generateSportQuestions, generateOneSportQuestion } from "./sport";
 export type QuestionGeneratorFn = (count: number) => Question[];
 export type OneQuestionGeneratorFn = (difficulty?: Difficulty) => Question;
 
-export const CATEGORY_GENERATORS: Record<
-  Exclude<CategorySlug, "corsi">,
-  QuestionGeneratorFn
-> = {
+export const CATEGORY_GENERATORS: Record<QuestionBankSlug, QuestionGeneratorFn> = {
   calcio: generateFootballQuestions,
   sport: generateSportQuestions,
   matematica: generateMathQuestions,
@@ -31,10 +29,7 @@ export const CATEGORY_GENERATORS: Record<
   patente: generatePatenteQuestions,
 };
 
-export const RUNTIME_GENERATORS: Record<
-  Exclude<CategorySlug, "corsi">,
-  OneQuestionGeneratorFn
-> = {
+export const RUNTIME_GENERATORS: Record<QuestionBankSlug, OneQuestionGeneratorFn> = {
   calcio: generateOneFootballQuestion,
   sport: generateOneSportQuestion,
   matematica: generateOneMathQuestion,
@@ -49,16 +44,13 @@ export const RUNTIME_GENERATORS: Record<
 };
 
 /** Categorie con generazione procedurale quasi infinita a runtime. */
-export const PROCEDURAL_CATEGORIES: CategorySlug[] = [
+export const PROCEDURAL_CATEGORIES: QuestionBankSlug[] = [
   "matematica",
   "inglese",
   "francese",
   "geografia",
 ];
 
-export function generateForCategory(
-  slug: Exclude<CategorySlug, "corsi">,
-  count: number
-): Question[] {
+export function generateForCategory(slug: QuestionBankSlug, count: number): Question[] {
   return CATEGORY_GENERATORS[slug](count);
 }

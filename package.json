@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cloud": "cross-env CLOUD_BUILD=1 next build",
+    "pages:build": "cross-env CLOUD_BUILD=1 npx @cloudflare/next-on-pages",
     "start": "next start",
     "lint": "eslint",
     "questions:seed": "tsx scripts/seedQuestions.ts --reset",
@@ -29,14 +31,17 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "tsx": "^4.19.4",
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.19.4",
+    "typescript": "^5",
+    "wrangler": "^4.19.0"
   }
 }
