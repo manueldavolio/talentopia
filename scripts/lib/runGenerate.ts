@@ -15,7 +15,7 @@ import {
   getAllBankCounts,
   loadQuestionBank,
   saveQuestionBank,
-} from "../../src/lib/questions/store";
+} from "../../src/lib/questions/store.fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.chdir(path.join(__dirname, "../.."));

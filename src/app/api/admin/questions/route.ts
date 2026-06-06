@@ -8,10 +8,13 @@ import {
 } from "@/lib/questions/store";
 import { generateForCategory } from "@/lib/questions/generators";
 import { isAdminAuthorized, unauthorizedResponse } from "@/lib/admin/auth";
+import { requireFilesystemWritable } from "@/lib/admin/fsGuard";
 import { parsePatenteCsvRows, parsePatenteXml } from "@/lib/patente/import";
 import { makeId } from "@/lib/questions/generator";
 import { isQuestionBankSlug } from "@/lib/questions/categorySlugs";
 import type { Question } from "@/types";
+
+export const runtime = "edge";
 
 export async function GET(request: NextRequest) {
   if (!isAdminAuthorized(request)) return unauthorizedResponse();
@@ -32,6 +35,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   if (!isAdminAuthorized(request)) return unauthorizedResponse();
+  const blocked = requireFilesystemWritable();
+  if (blocked) return blocked;
   const body = await request.json();
   const action = body.action as string;
 
@@ -115,6 +120,8 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   if (!isAdminAuthorized(request)) return unauthorizedResponse();
+  const blocked = requireFilesystemWritable();
+  if (blocked) return blocked;
   const body = await request.json();
   const slug = body.categorySlug as string;
   if (!isQuestionBankSlug(slug)) {
@@ -129,6 +136,8 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   if (!isAdminAuthorized(request)) return unauthorizedResponse();
+  const blocked = requireFilesystemWritable();
+  if (blocked) return blocked;
   const slug = request.nextUrl.searchParams.get("category");
   const id = request.nextUrl.searchParams.get("id");
   if (!slug || !id || !isQuestionBankSlug(slug)) {

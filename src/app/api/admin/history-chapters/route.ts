@@ -5,6 +5,9 @@ import {
   type HistoryChapter,
 } from "@/lib/questions/store";
 import { isAdminAuthorized, unauthorizedResponse } from "@/lib/admin/auth";
+import { requireFilesystemWritable } from "@/lib/admin/fsGuard";
+
+export const runtime = "edge";
 
 export async function GET(request: NextRequest) {
   if (!isAdminAuthorized(request)) return unauthorizedResponse();
@@ -13,6 +16,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   if (!isAdminAuthorized(request)) return unauthorizedResponse();
+  const blocked = requireFilesystemWritable();
+  if (blocked) return blocked;
   const body = await request.json();
   const chapters = body.chapters as HistoryChapter[];
   if (!Array.isArray(chapters)) {

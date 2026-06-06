@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { isQuestionBankSlug } from "@/lib/questions/categorySlugs";
 import { pickQuestionsForQuiz } from "@/lib/questions/service";
 
+export const runtime = "edge";
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const category = searchParams.get("category");

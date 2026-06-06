@@ -9,9 +9,13 @@ import {
 } from "@/lib/questions/store.static";
 import type { HistoryChapter } from "@/lib/questions/store.types";
 
-/** Percorsi filesystem non disponibili in CLOUD_BUILD. */
+/** Percorsi filesystem non disponibili in CLOUD_BUILD / Edge. */
 export const QUESTION_BANK_DIR = "";
 export const HISTORY_CHAPTERS_PATH = "";
+
+export function isFilesystemWritable(): boolean {
+  return false;
+}
 
 export function getBankFilePath(slug: CategorySlug): string {
   return `${slug}.json`;
@@ -22,7 +26,7 @@ export function loadQuestionBank(slug: CategorySlug): Question[] {
 }
 
 export function saveQuestionBank(_slug: CategorySlug, _questions: Question[]): void {
-  console.warn("[store] saveQuestionBank ignorato: CLOUD_BUILD senza filesystem");
+  throw new Error("Admin file editing is local-only");
 }
 
 export function getAllBankCounts(): Partial<Record<CategorySlug, number>> {
@@ -82,5 +86,5 @@ export function loadHistoryChapters(): HistoryChapter[] {
 }
 
 export function saveHistoryChapters(_chapters: HistoryChapter[]): void {
-  console.warn("[store] saveHistoryChapters ignorato: CLOUD_BUILD senza filesystem");
+  throw new Error("Admin file editing is local-only");
 }

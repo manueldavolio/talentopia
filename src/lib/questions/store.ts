@@ -3,6 +3,7 @@ export { dedupeQuestions, mergeQuestions } from "@/lib/questions/store.logic";
 export {
   QUESTION_BANK_DIR,
   HISTORY_CHAPTERS_PATH,
+  isFilesystemWritable,
   getBankFilePath,
   loadQuestionBank,
   saveQuestionBank,
@@ -14,4 +15,4 @@ export {
   appendQuestions,
   loadHistoryChapters,
   saveHistoryChapters,
-} from "./store.fs";
+} from "./store.fs.stub";

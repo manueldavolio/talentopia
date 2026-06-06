@@ -14,6 +14,10 @@ export const HISTORY_CHAPTERS_PATH = path.join(
   "history-chapters.json"
 );
 
+export function isFilesystemWritable(): boolean {
+  return true;
+}
+
 function ensureDir(): void {
   if (!fs.existsSync(QUESTION_BANK_DIR)) {
     fs.mkdirSync(QUESTION_BANK_DIR, { recursive: true });
