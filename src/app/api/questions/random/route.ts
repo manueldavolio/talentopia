@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { isQuestionBankSlug } from "@/lib/questions/categorySlugs";
+import { apiError } from "@/lib/api/response";
 import { edgeLog } from "@/lib/edgeLog";
 
 export const runtime = "edge";
@@ -42,7 +43,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (!category || !isQuestionBankSlug(category)) {
-      return NextResponse.json({ error: "Categoria non valida" }, { status: 400 });
+      return Response.json(
+        { success: false, error: "Categoria non valida" },
+        { status: 400 }
+      );
     }
 
     const { pickQuestionsForQuiz } = await import("@/lib/questions/service");
@@ -58,18 +62,19 @@ export async function GET(request: NextRequest) {
 
     if (questions.length === 0) {
       edgeLog("api/questions/random", `Nessuna domanda per ${category}`);
-      return NextResponse.json(
-        { error: "Domande non disponibili, riprova", questions: [] },
+      return Response.json(
+        {
+          success: false,
+          error: "Domande non disponibili, riprova",
+          questions: [],
+        },
         { status: 503 }
       );
     }
 
-    return NextResponse.json({ questions });
+    return Response.json({ success: true, questions });
   } catch (err) {
     edgeLog("api/questions/random", "Errore generazione domande", err);
-    return NextResponse.json(
-      { error: "Domande non disponibili, riprova", questions: [] },
-      { status: 503 }
-    );
+    return apiError(err);
   }
 }

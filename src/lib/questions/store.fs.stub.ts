@@ -22,7 +22,12 @@ export function getBankFilePath(slug: CategorySlug): string {
 }
 
 export function loadQuestionBank(slug: CategorySlug): Question[] {
-  return loadQuestionBankStatic(slug);
+  try {
+    return loadQuestionBankStatic(slug);
+  } catch (err) {
+    console.error(`[store] loadQuestionBank(${slug}) failed:`, err);
+    return [];
+  }
 }
 
 export function saveQuestionBank(_slug: CategorySlug, _questions: Question[]): void {
