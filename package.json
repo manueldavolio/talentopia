@@ -1,19 +1,35 @@
 {
-  "name": "quiz-arena",
+  "name": "talentopia",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "questions:seed": "tsx scripts/seedQuestions.ts --reset",
+    "questions:verify:calcio": "tsx scripts/verifyCalcioSample.ts",
+    "questions:seed:full": "tsx scripts/seedQuestions.ts 1000",
+    "questions:math": "tsx scripts/generateMathQuestions.ts",
+    "questions:english": "tsx scripts/generateEnglishQuestions.ts",
+    "questions:geography": "tsx scripts/generateGeographyQuestions.ts",
+    "questions:sport": "tsx scripts/generateSportQuestions.ts",
+    "questions:football": "tsx scripts/generateFootballQuestions.ts",
+    "questions:history": "tsx scripts/generateHistoryQuestions.ts",
+    "questions:fantacalcio": "tsx scripts/generateFantasyFootballQuestions.ts",
+    "questions:french": "tsx scripts/generateFrenchQuestions.ts",
+    "questions:inter": "tsx scripts/generateInterQuestions.ts",
+    "questions:match-analyst": "tsx scripts/generateMatchAnalystQuestions.ts",
+    "questions:patente": "tsx scripts/generatePatenteQuestions.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.107.0",
     "next": "16.2.7",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "tsx": "^4.19.4",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

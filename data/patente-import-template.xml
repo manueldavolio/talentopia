@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Template importazione banca domande ministeriali — Talentopia Patente.
+  Usare da Admin → Import XML (categoria patente).
+  Estendere con domande reali quando disponibile database ufficiale.
+-->
+<bancaPatente versione="1" fonte="template">
+  <domanda testo="Quale forma hanno i segnali di pericolo?" argomento="segnali di pericolo">
+    <opzione lettera="A" corretta="true">Triangolo con vertice in alto e bordo rosso</opzione>
+    <opzione lettera="B">Cerchio con bordo rosso</opzione>
+    <opzione lettera="C">Quadrato blu</opzione>
+    <opzione lettera="D">Ottagono rosso</opzione>
+    <spiegazione>I segnali di pericolo avvisano di un rischio sulla strada.</spiegazione>
+    <esempio>In curva pericolosa compare un triangolo rosso.</esempio>
+    <curiosita>In Italia esistono decine di varianti di segnali di pericolo.</curiosita>
+    <trucco>Triangolo = attenzione!</trucco>
+    <difficolta>facile</difficolta>
+  </domanda>
+</bancaPatente>

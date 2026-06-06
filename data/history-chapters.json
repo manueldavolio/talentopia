@@ -1,0 +1,31 @@
+[
+  {
+    "id": "medioevo-base",
+    "title": "Medioevo - Scuola media",
+    "grade": "seconda media",
+    "topics": ["feudalesimo", "crociate", "comuni"],
+    "facts": [
+      {
+        "q": "Cos'è il feudalesimo?",
+        "a": "Sistema di rapporti tra signore e vassalli",
+        "wrong": ["Democrazia ateniese", "Impero coloniale", "Repubblica moderna"],
+        "topic": "feudalesimo",
+        "diff": "facile"
+      },
+      {
+        "q": "Chi erano i vassalli?",
+        "a": "Nobili che giuravano fedeltà al signore",
+        "wrong": ["Contadini liberi", "Mercanti fiorentini", "Faraoni"],
+        "topic": "feudalesimo",
+        "diff": "media"
+      },
+      {
+        "q": "Le Crociate avevano come meta principale?",
+        "a": "Terrasanta / Gerusalemme",
+        "wrong": ["America", "Giappone", "Polo Nord"],
+        "topic": "crociate",
+        "diff": "facile"
+      }
+    ]
+  }
+]

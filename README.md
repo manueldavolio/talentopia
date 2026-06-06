@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Talentopia
 
-## Getting Started
+Piattaforma educativa per ragazzi 10-13 anni: quiz, minigiochi, XP, monete e badge.
 
-First, run the development server:
+## Installazione
+
+```bash
+npm install
+```
+
+## Avvio in locale
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Apri [http://localhost:3000](http://localhost:3000). Alla prima visita inserisci il nome giocatore su `/login`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Collegare Supabase
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Crea un progetto su [supabase.com](https://supabase.com)
+2. Copia `.env.local.example` in `.env.local` e inserisci URL e anon key
+3. Nel SQL Editor esegui `supabase/schema.sql`
+4. Installa il client (già in package.json): `@supabase/supabase-js`
+5. Le funzioni in `src/lib/supabase/queries.ts` sono pronte per salvare tentativi quando configuri le env
 
-## Learn More
+## Aggiungere nuove domande
 
-To learn more about Next.js, take a look at the following resources:
+- **Statiche**: modifica i file in `src/lib/questions/banks/`
+- **Template infiniti**: aggiungi template in `generator.ts` / `generateFromTemplates` per categoria
+- **Database**: inserisci righe nella tabella `questions` su Supabase
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Pubblicazione online
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Deploy consigliato su [Vercel](https://vercel.com):
 
-## Deploy on Vercel
+```bash
+npm run build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Collega il repo GitHub a Vercel e aggiungi le variabili `NEXT_PUBLIC_SUPABASE_*` se usi Supabase.
