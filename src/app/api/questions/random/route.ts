@@ -1,9 +1,73 @@
 import { NextRequest } from "next/server";
-import { isQuestionBankSlug } from "@/lib/questions/categorySlugs";
-import { apiError } from "@/lib/api/response";
-import { edgeLog } from "@/lib/edgeLog";
+import {
+  isQuestionBankSlug,
+  type QuestionBankSlug,
+} from "@/lib/questions/categorySlugs";
+import {
+  RUNTIME_GENERATORS,
+  generateForCategory,
+} from "@/lib/questions/generators";
+import { reshuffleQuestion, shuffle } from "@/lib/questions/generator";
+import { difficultyWeightsFromRating } from "@/lib/adaptiveDifficulty";
+import { isPlayableQuestion } from "@/lib/questions/quality";
+import type { Difficulty, Question } from "@/types";
 
 export const runtime = "edge";
+
+function pickDifficulty(weights: Record<Difficulty, number>): Difficulty {
+  const r = Math.random();
+  let acc = 0;
+  const order: Difficulty[] = ["facile", "media", "difficile"];
+  for (const d of order) {
+    acc += weights[d];
+    if (r <= acc) return d;
+  }
+  return "media";
+}
+
+function pickEdgeQuestions(
+  categorySlug: QuestionBankSlug,
+  count: number,
+  categoryRating: number,
+  excludeIds: string[],
+  blockedDailyIds: string[]
+): Question[] {
+  const exclude = new Set(excludeIds);
+  const blockedDaily = new Set(blockedDailyIds);
+  const weights = difficultyWeightsFromRating(categoryRating);
+  const poolSize = Math.max(count * 3, 30);
+
+  let pool = generateForCategory(categorySlug, poolSize)
+    .filter(isPlayableQuestion)
+    .filter((q) => !exclude.has(q.id) && !blockedDaily.has(q.id));
+
+  const selected: Question[] = [];
+  const usedText = new Set<string>();
+
+  while (selected.length < count && pool.length > 0) {
+    const idx = Math.floor(Math.random() * pool.length);
+    const q = pool[idx];
+    pool.splice(idx, 1);
+    if (usedText.has(q.question)) continue;
+    usedText.add(q.question);
+    selected.push(reshuffleQuestion(q));
+  }
+
+  let guard = 0;
+  const guardMax = count * 30;
+  while (selected.length < count && guard < guardMax) {
+    guard++;
+    const diff = pickDifficulty(weights);
+    const q = RUNTIME_GENERATORS[categorySlug](diff);
+    if (!isPlayableQuestion(q)) continue;
+    if (exclude.has(q.id) || blockedDaily.has(q.id)) continue;
+    if (usedText.has(q.question)) continue;
+    usedText.add(q.question);
+    selected.push(reshuffleQuestion(q));
+  }
+
+  return shuffle(selected);
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,15 +77,12 @@ export async function GET(request: NextRequest) {
       30,
       Math.max(1, parseInt(searchParams.get("count") || "10", 10))
     );
-    const level = Math.max(
-      1,
-      parseInt(searchParams.get("level") || "1", 10)
-    );
+    const level = Math.max(1, parseInt(searchParams.get("level") || "1", 10));
     const ratingParam = searchParams.get("rating");
     const categoryRating =
       ratingParam !== null && ratingParam !== ""
         ? Math.max(0, parseInt(ratingParam, 10))
-        : undefined;
+        : level * 100;
     const excludeRaw = searchParams.get("exclude") || "";
     const excludeIds = excludeRaw
       .split(",")
@@ -32,36 +93,23 @@ export async function GET(request: NextRequest) {
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    const recentTextsRaw = searchParams.get("recentTexts") || "";
-    let recentTexts: string[] = [];
-    if (recentTextsRaw) {
-      try {
-        recentTexts = JSON.parse(decodeURIComponent(recentTextsRaw)) as string[];
-      } catch {
-        recentTexts = [];
-      }
-    }
 
     if (!category || !isQuestionBankSlug(category)) {
       return Response.json(
-        { success: false, error: "Categoria non valida" },
+        { success: false, error: "Categoria non valida", questions: [] },
         { status: 400 }
       );
     }
 
-    const { pickQuestionsForQuiz } = await import("@/lib/questions/service");
-    const questions = pickQuestionsForQuiz({
-      categorySlug: category,
+    const questions = pickEdgeQuestions(
+      category,
       count,
       categoryRating,
-      playerLevel: level,
       excludeIds,
-      recentTexts,
-      blockedDailyIds,
-    });
+      blockedDailyIds
+    );
 
     if (questions.length === 0) {
-      edgeLog("api/questions/random", `Nessuna domanda per ${category}`);
       return Response.json(
         {
           success: false,
@@ -72,9 +120,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return Response.json({ success: true, questions });
+    return Response.json({
+      success: true,
+      question: questions[0],
+      questions,
+    });
   } catch (err) {
-    edgeLog("api/questions/random", "Errore generazione domande", err);
-    return apiError(err);
+    console.log("[api/questions/random]", err);
+    const message = err instanceof Error ? err.message : String(err);
+    return Response.json(
+      { success: false, error: message, questions: [] },
+      { status: 500 }
+    );
   }
 }
