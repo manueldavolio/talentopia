@@ -6,6 +6,7 @@ import { QuizCard } from "@/components/quiz/QuizCard";
 import { PatenteQuizCard } from "@/components/quiz/PatenteQuizCard";
 import { XpPopup } from "@/components/effects/XpPopup";
 import { GameButton } from "@/components/ui/GameButton";
+import { RouteFallback } from "@/components/ui/RouteFallback";
 import { usePlayer } from "@/context/PlayerContext";
 import { QUIZ_QUESTIONS_PER_ROUND } from "@/lib/constants";
 import { getCategoryBySlug } from "@/data/categories";
@@ -109,7 +110,14 @@ export default function QuizPageClient() {
   };
 
   if (!category) {
-    return <p>Quiz non trovato</p>;
+    console.warn("[quiz]", `Categoria non trovata: ${slug}`);
+    return (
+      <RouteFallback
+        title="Quiz non trovato"
+        message="La categoria quiz che cerchi non esiste o non è più disponibile."
+        backHref="/dashboard"
+      />
+    );
   }
 
   if (loading) {
@@ -122,10 +130,14 @@ export default function QuizPageClient() {
 
   if (error || !current) {
     return (
-      <div className="text-center py-12 space-y-4">
-        <p className="text-red-400">{error || "Nessuna domanda disponibile"}</p>
-        <GameButton href={`/quiz/${slug}`}>Riprova</GameButton>
-      </div>
+      <RouteFallback
+        title="Domande non disponibili"
+        message={error || "Domande non disponibili, riprova"}
+        retryHref={`/quiz/${slug}`}
+        retryLabel="Riprova"
+        backHref={`/category/${slug}`}
+        backLabel="← Categoria"
+      />
     );
   }
 

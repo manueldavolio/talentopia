@@ -1,5 +1,12 @@
-export const runtime = "edge";
-
+import { QUESTION_BANK_SLUGS } from "@/lib/questions/categorySlugs";
 import QuizPageClient from "./QuizPageClient";
 
-export default QuizPageClient;
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return QUESTION_BANK_SLUGS.map((id) => ({ id }));
+}
+
+export default function QuizPage() {
+  return <QuizPageClient />;
+}

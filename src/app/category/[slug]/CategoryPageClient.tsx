@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCategoryBySlug } from "@/data/categories";
 import { GameButton } from "@/components/ui/GameButton";
+import { RouteFallback } from "@/components/ui/RouteFallback";
 import { usePlayer } from "@/context/PlayerContext";
 import {
   expectedDifficultyMix,
@@ -41,6 +42,8 @@ export default function CategoryPageClient() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
+  const { player } = usePlayer();
+  const counts = useQuestionCounts();
 
   useEffect(() => {
     if (slug === "corsi") router.replace("/courses");
@@ -49,11 +52,17 @@ export default function CategoryPageClient() {
   const category = getCategoryBySlug(slug);
 
   if (!category) {
-    return <p>Categoria non trovata</p>;
+    console.warn("[category]", `Categoria non trovata: ${slug}`);
+    return (
+      <RouteFallback
+        title="Categoria non trovata"
+        message="La categoria che cerchi non esiste o non è più disponibile."
+        backHref="/dashboard"
+        backLabel="← Dashboard"
+      />
+    );
   }
 
-  const { player } = usePlayer();
-  const counts = useQuestionCounts();
   const count = counts?.[slug as CategorySlug];
   const minigames = MINIGAMES_BY_CATEGORY[slug] || [];
   const categorySlug = slug as CategorySlug;

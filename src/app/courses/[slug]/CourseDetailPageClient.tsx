@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { getCourseBySlug } from "@/data/courses";
 import { CourseProgressBar } from "@/components/courses/CourseProgress";
 import { getCourseProgress } from "@/lib/courses/progress";
+import { RouteFallback } from "@/components/ui/RouteFallback";
 import { GameButton } from "@/components/ui/GameButton";
 
 export default function CourseDetailPageClient() {
@@ -13,7 +14,15 @@ export default function CourseDetailPageClient() {
   const course = getCourseBySlug(slug);
 
   if (!course) {
-    return <p>Corso non trovato</p>;
+    console.warn("[courses]", `Corso non trovato: ${slug}`);
+    return (
+      <RouteFallback
+        title="Corso non trovato"
+        message="Il corso che cerchi non esiste o non è più disponibile."
+        backHref="/courses"
+        backLabel="← Tutti i corsi"
+      />
+    );
   }
 
   const progress = getCourseProgress(course.id);

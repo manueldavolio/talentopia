@@ -10,7 +10,7 @@ import {
   ratingFromPlayerLevel,
 } from "@/lib/adaptiveDifficulty";
 import { isTooSimilarToAny } from "@/lib/questions/similarity";
-import { QUESTION_BANK_SLUGS, isQuestionBankSlug, type QuestionBankSlug } from "@/lib/questions/categorySlugs";
+import type { QuestionBankSlug } from "@/lib/questions/categorySlugs";
 import { loadQuestionBank } from "@/lib/questions/store";
 import type { CategorySlug, Difficulty, Question } from "@/types";
 
@@ -171,16 +171,4 @@ export function pickQuestionsForQuiz(
   return shuffle(selected);
 }
 
-export function getBankCount(categorySlug: QuestionBankSlug): number {
-  return loadQuestionBank(categorySlug).length;
-}
-
-export function getAllCounts(): Partial<Record<CategorySlug, number>> {
-  return QUESTION_BANK_SLUGS.reduce(
-    (acc, slug) => {
-      acc[slug] = getBankCount(slug);
-      return acc;
-    },
-    {} as Partial<Record<CategorySlug, number>>
-  );
-}
+export { getAllCounts, getBankCount } from "@/lib/questions/counts";

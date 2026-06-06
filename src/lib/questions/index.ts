@@ -12,10 +12,12 @@ export function getRandomQuestions(
 
 export {
   pickQuestionsForQuiz,
+} from "@/lib/questions/service";
+export {
   getAllCounts,
   getAllCounts as getQuestionCounts,
   getBankCount,
-} from "@/lib/questions/service";
+} from "@/lib/questions/counts";
 export { generateForCategory, CATEGORY_GENERATORS } from "@/lib/questions/generators";
 export { getStoriaTimelineEvents } from "@/lib/questions/generators/historyTimeline";
 export { generateFromTemplates, reshuffleQuestion, shuffle } from "@/lib/questions/generator";

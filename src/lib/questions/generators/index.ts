@@ -43,13 +43,7 @@ export const RUNTIME_GENERATORS: Record<QuestionBankSlug, OneQuestionGeneratorFn
   patente: generateOnePatenteQuestion,
 };
 
-/** Categorie con generazione procedurale quasi infinita a runtime. */
-export const PROCEDURAL_CATEGORIES: QuestionBankSlug[] = [
-  "matematica",
-  "inglese",
-  "francese",
-  "geografia",
-];
+export { PROCEDURAL_CATEGORIES } from "@/lib/questions/proceduralCategories";
 
 export function generateForCategory(slug: QuestionBankSlug, count: number): Question[] {
   return CATEGORY_GENERATORS[slug](count);

@@ -41,8 +41,13 @@ export function useQuizQuestions(
           );
         }
         const res = await fetch(`/api/questions/random?${params}`);
-        if (!res.ok) throw new Error("Errore caricamento domande");
-        const data = (await res.json()) as { questions: Question[] };
+        const data = (await res.json()) as {
+          questions?: Question[];
+          error?: string;
+        };
+        if (!res.ok || !data.questions?.length) {
+          throw new Error(data.error || "Domande non disponibili, riprova");
+        }
         if (cancelled) return;
         setQuestions(data.questions);
         recordQuestionsSeen(
@@ -51,7 +56,9 @@ export function useQuizQuestions(
         );
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Errore sconosciuto");
+          setError(
+            e instanceof Error ? e.message : "Domande non disponibili, riprova"
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
