@@ -1,15 +1,15 @@
-import { NextRequest } from "next/server";
 import {
   isQuestionBankSlug,
   type QuestionBankSlug,
 } from "@/lib/questions/categorySlugs";
-import {
-  RUNTIME_GENERATORS,
-  generateForCategory,
-} from "@/lib/questions/generators";
-import { reshuffleQuestion, shuffle } from "@/lib/questions/generator";
 import { difficultyWeightsFromRating } from "@/lib/adaptiveDifficulty";
+import { reshuffleQuestion, shuffle } from "@/lib/questions/generator";
+import {
+  generateForCategory,
+  RUNTIME_GENERATORS,
+} from "@/lib/questions/generators";
 import { isPlayableQuestion } from "@/lib/questions/quality";
+import { isTooSimilarToAny } from "@/lib/questions/similarity";
 import type { Difficulty, Question } from "@/types";
 
 export const runtime = "edge";
@@ -17,12 +17,31 @@ export const runtime = "edge";
 function pickDifficulty(weights: Record<Difficulty, number>): Difficulty {
   const r = Math.random();
   let acc = 0;
-  const order: Difficulty[] = ["facile", "media", "difficile"];
-  for (const d of order) {
+  for (const d of ["facile", "media", "difficile"] as const) {
     acc += weights[d];
     if (r <= acc) return d;
   }
   return "media";
+}
+
+function parseListParam(raw: string | null): string[] {
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function parseRecentTexts(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(decodeURIComponent(raw)) as unknown;
+    return Array.isArray(parsed)
+      ? parsed.filter((t): t is string => typeof t === "string")
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 function pickEdgeQuestions(
@@ -30,16 +49,21 @@ function pickEdgeQuestions(
   count: number,
   categoryRating: number,
   excludeIds: string[],
-  blockedDailyIds: string[]
+  blockedDailyIds: string[],
+  recentTexts: string[]
 ): Question[] {
   const exclude = new Set(excludeIds);
   const blockedDaily = new Set(blockedDailyIds);
   const weights = difficultyWeightsFromRating(categoryRating);
   const poolSize = Math.max(count * 3, 30);
 
-  let pool = generateForCategory(categorySlug, poolSize)
-    .filter(isPlayableQuestion)
-    .filter((q) => !exclude.has(q.id) && !blockedDaily.has(q.id));
+  const passes = (q: Question) =>
+    isPlayableQuestion(q) &&
+    !exclude.has(q.id) &&
+    !blockedDaily.has(q.id) &&
+    !isTooSimilarToAny(q.question, recentTexts);
+
+  let pool = generateForCategory(categorySlug, poolSize).filter(passes);
 
   const selected: Question[] = [];
   const usedText = new Set<string>();
@@ -57,10 +81,8 @@ function pickEdgeQuestions(
   const guardMax = count * 30;
   while (selected.length < count && guard < guardMax) {
     guard++;
-    const diff = pickDifficulty(weights);
-    const q = RUNTIME_GENERATORS[categorySlug](diff);
-    if (!isPlayableQuestion(q)) continue;
-    if (exclude.has(q.id) || blockedDaily.has(q.id)) continue;
+    const q = RUNTIME_GENERATORS[categorySlug](pickDifficulty(weights));
+    if (!passes(q)) continue;
     if (usedText.has(q.question)) continue;
     usedText.add(q.question);
     selected.push(reshuffleQuestion(q));
@@ -69,9 +91,9 @@ function pickEdgeQuestions(
   return shuffle(selected);
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const { searchParams } = request.nextUrl;
+    const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
     const count = Math.min(
       30,
@@ -83,16 +105,9 @@ export async function GET(request: NextRequest) {
       ratingParam !== null && ratingParam !== ""
         ? Math.max(0, parseInt(ratingParam, 10))
         : level * 100;
-    const excludeRaw = searchParams.get("exclude") || "";
-    const excludeIds = excludeRaw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    const blockedRaw = searchParams.get("blockedDaily") || "";
-    const blockedDailyIds = blockedRaw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const excludeIds = parseListParam(searchParams.get("exclude"));
+    const blockedDailyIds = parseListParam(searchParams.get("blockedDaily"));
+    const recentTexts = parseRecentTexts(searchParams.get("recentTexts"));
 
     if (!category || !isQuestionBankSlug(category)) {
       return Response.json(
@@ -106,7 +121,8 @@ export async function GET(request: NextRequest) {
       count,
       categoryRating,
       excludeIds,
-      blockedDailyIds
+      blockedDailyIds,
+      recentTexts
     );
 
     if (questions.length === 0) {

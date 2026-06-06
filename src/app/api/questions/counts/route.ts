@@ -18,12 +18,13 @@ function buildCounts(): Partial<Record<CategorySlug, number>> {
 export async function GET() {
   try {
     const counts = buildCounts();
-    return Response.json({ success: true, counts });
+    const total = Object.values(counts).reduce((sum, n) => sum + (n ?? 0), 0);
+    return Response.json({ success: true, counts, total });
   } catch (err) {
     console.log("[api/questions/counts]", err);
     const message = err instanceof Error ? err.message : String(err);
     return Response.json(
-      { success: false, error: message, counts: {} },
+      { success: false, error: message, counts: {}, total: 0 },
       { status: 500 }
     );
   }
