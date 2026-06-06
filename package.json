@@ -15,6 +15,8 @@
     "lint": "eslint",
     "questions:seed": "tsx scripts/seedQuestions.ts --reset",
     "questions:verify:calcio": "tsx scripts/verifyCalcioSample.ts",
+    "questions:verify:inter": "tsx scripts/verifyInterQuality.ts",
+    "questions:verify:sport": "tsx scripts/verifySportQuality.ts",
     "questions:seed:full": "tsx scripts/seedQuestions.ts 1000",
     "questions:math": "tsx scripts/generateMathQuestions.ts",
     "questions:english": "tsx scripts/generateEnglishQuestions.ts",

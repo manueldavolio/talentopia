@@ -41,6 +41,35 @@ const CHILDISH_PAIRS: [string, string][] = [
   ["calcio professionistico", "basket"],
 ];
 
+/** Domande opinabili o con più risposte plausibili — da scartare in generazione e seed. */
+export const SUBJECTIVE_QUESTION_PATTERNS: RegExp[] = [
+  /giocatore\s+simbolo/i,
+  /più\s+forte/i,
+  /più\s+importante/i,
+  /migliore\s+di\s+sempre/i,
+  /leggenda\s+principale/i,
+  /più\s+legato/i,
+  /\bquale\s+è\s+più\b/i,
+  /\bchi\s+è\s+il\s+più\b/i,
+  /chi\s+fu\s+decisivo/i,
+  /fu\s+decisivo\s+nel/i,
+  /leggenda\s+legata/i,
+  /tra\s+.+?\s+e\s+.+?,?\s+quale/i,
+  /quale\s+affermazione\s+sull'inter\s+è\s+corretta/i,
+  /quale\s+risposta\s+è\s+errata/i,
+  /quale\s+simbolo\s+compare/i,
+  /più\s+iconic[oa]/i,
+  /miglior\s+(giocatore|attaccante|difensore|portiere|allenatore)/i,
+];
+
+const VAGUE_ANSWER_PATTERNS: RegExp[] = [
+  /^più\s+edizioni/i,
+  /simbolo\s+storico\s+milanese/i,
+  /leggenda\s+del\s+club,\s*stadio/i,
+  /club\s+storico\s+di\s+milano$/i,
+  /^sì,\s+in\s+più\s+periodi/i,
+];
+
 function norm(s: string | undefined): string {
   return (s ?? "").trim().toLowerCase();
 }
@@ -57,6 +86,43 @@ function optionsOf(q: Question): string[] {
 function correctText(q: Question): string {
   const key = `option${q.correctOption}` as keyof Question;
   return String(q[key]);
+}
+
+export function isSubjectiveQuestion(q: Question): boolean {
+  const text = norm(q.question);
+  if (SUBJECTIVE_QUESTION_PATTERNS.some((p) => p.test(text))) return true;
+  const correct = norm(correctText(q));
+  if (VAGUE_ANSWER_PATTERNS.some((p) => p.test(correct))) return true;
+  return false;
+}
+
+/** Due opzioni plausibili quando la domanda chiede un confronto soggettivo. */
+export function hasAmbiguousOptionPair(q: Question): boolean {
+  const text = norm(q.question);
+  if (!/tra\s+.+\s+e\s+.+/i.test(text)) return false;
+  const opts = optionsOf(q).map(norm);
+  const sportsNames = [
+    "milito",
+    "zanetti",
+    "meazza",
+    "mazzola",
+    "sneijder",
+    "ronaldo",
+    "etoo",
+    "eto'o",
+    "vieri",
+    "bergomi",
+    "matthäus",
+    "matthaus",
+  ];
+  const namedInOpts = opts.filter((o) =>
+    sportsNames.some((n) => o.includes(n))
+  );
+  return namedInOpts.length >= 2;
+}
+
+export function isAmbiguousQuestion(q: Question): boolean {
+  return isSubjectiveQuestion(q) || hasAmbiguousOptionPair(q);
 }
 
 export function isFallbackQuestion(q: Question): boolean {
@@ -83,6 +149,7 @@ export function passesQualityGate(q: Question): QualityResult {
     return { ok: false, reason: "domanda troppo corta" };
   }
   if (isFallbackQuestion(q)) return { ok: false, reason: "fallback" };
+  if (isAmbiguousQuestion(q)) return { ok: false, reason: "domanda soggettiva o ambigua" };
 
   const opts = optionsOf(q);
   if (opts.some((o) => !o?.trim() || o.trim().length < MIN_OPTION_LEN)) {

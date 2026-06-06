@@ -1,18 +1,19 @@
 import { buildMcq, generateFromTemplates, makeId, pickRandom, type QuestionTemplate } from "@/lib/questions/generator";
 import {
   interCoaches,
-  interFacts,
-  interPlayers,
-  interQuickFacts,
+  interPlayerFacts,
+  interSureFacts,
 } from "@/lib/questions/datasets/inter";
 import { filterQualityQuestions } from "@/lib/questions/quality";
 import { finalizeQuestions } from "@/lib/questions/safety";
 import { generateParametricInterBatch } from "@/lib/questions/generators/interParametric";
 import type { Difficulty, Question } from "@/types";
+import type { InterFact } from "@/lib/questions/datasets/inter";
 
 const SUBJECT = "Inter";
+const ALL_FACTS: InterFact[] = [...interSureFacts, ...interPlayerFacts];
 
-function factToQuestion(f: (typeof interFacts)[0], id: string): Question {
+function factToQuestion(f: InterFact, id: string): Question {
   const q = buildMcq(
     "inter",
     SUBJECT,
@@ -32,48 +33,13 @@ function factToQuestion(f: (typeof interFacts)[0], id: string): Question {
 }
 
 export function getInterTemplates(): QuestionTemplate[] {
-  const topics = [
-    "fondazione",
-    "colori sociali",
-    "San Siro",
-    "derby",
-    "Champions League",
-    "Triplete",
-    "giocatori storici",
-    "allenatori",
-    "rivalità",
-    "curiosità",
-  ];
-
   return [
     {
       topic: "storia dell'Inter",
       difficulty: "media",
       generate: () => {
-        const f = pickRandom([...interFacts, ...interQuickFacts]);
+        const f = pickRandom(ALL_FACTS);
         return factToQuestion(f, makeId("inter"));
-      },
-    },
-    {
-      topic: "giocatori storici",
-      difficulty: "media",
-      generate: () => {
-        const player = pickRandom(interPlayers);
-        const others = interPlayers.filter((p) => p !== player).slice(0, 3);
-        return buildMcq(
-          "inter",
-          SUBJECT,
-          "giocatori storici",
-          "media",
-          `${player} è una leggenda legata a quale club?`,
-          "Inter",
-          ["Milan", "Juventus", "Roma"],
-          `${player} ha fatto parte della storia nerazzurra.`,
-          {
-            curiosity: "Molte icone hanno indossato la maglia azzurra e nera.",
-            memoryTip: "Leggende Inter = Meazza, Zanetti, Milito...",
-          }
-        );
       },
     },
     {
@@ -82,18 +48,18 @@ export function getInterTemplates(): QuestionTemplate[] {
       generate: () => {
         const coach = pickRandom(interCoaches);
         const facts: Record<string, string> = {
-          "Helenio Herrera": "Grande Inter anni '60",
-          "José Mourinho": "Triplete 2010",
-          "Roberto Mancini": "Scudetti anni 2000",
-          "Antonio Conte": "Scudetto 2021",
-          "Simone Inzaghi": "Coppa Italia e Supercoppa recenti",
+          "Helenio Herrera": "allenò la Grande Inter anni '60",
+          "José Mourinho": "guidò il Triplete 2010",
+          "Roberto Mancini": "allenò l'Inter più volte",
+          "Antonio Conte": "vinse lo Scudetto 2020-21",
+          "Simone Inzaghi": "allenò l'Inter negli anni 2020",
         };
         return buildMcq(
           "inter",
           SUBJECT,
           "allenatori",
           "media",
-          `${coach} è stato allenatore dell'Inter?`,
+          `${coach} ha allenato la prima squadra dell'Inter?`,
           "Sì",
           ["No, mai", "Solo in primavera", "Solo come giocatore"],
           `${coach}: ${facts[coach] ?? "allenatore dell'Inter"}.`,
@@ -104,44 +70,11 @@ export function getInterTemplates(): QuestionTemplate[] {
         );
       },
     },
-    {
-      topic: "competizioni",
-      difficulty: "media",
-      generate: () => {
-        const t = pickRandom(topics);
-        return buildMcq(
-          "inter",
-          SUBJECT,
-          t,
-          "media",
-          `Quale affermazione sull'Inter è corretta riguardo «${t}»?`,
-          t === "Triplete"
-            ? "Nel 2010 vinse Scudetto, Coppa Italia e Champions"
-            : t === "derby"
-              ? "Il derby di Milano si gioca contro il Milan"
-              : t === "San Siro"
-                ? "Condivide San Siro con il Milan"
-                : "L'Inter è un club storico di Milano",
-          [
-            "L'Inter gioca a Roma",
-            "I colori sono rosso e nero",
-            "Fu fondata nel 1899",
-          ],
-          "Informazione verificata sulla storia nerazzurra.",
-          {
-            curiosity: "La storia dell'Inter attraversa tutto il calcio italiano.",
-            memoryTip: "Milano, nerazzurri, San Siro, Triplete 2010.",
-          }
-        );
-      },
-    },
   ];
 }
 
 function staticFacts(): Question[] {
-  return [...interFacts, ...interQuickFacts].map((f, i) =>
-    factToQuestion(f, `inter_fact_${i}`)
-  );
+  return ALL_FACTS.map((f, i) => factToQuestion(f, `inter_fact_${i}`));
 }
 
 export function generateInterQuestions(count: number): Question[] {
@@ -150,9 +83,9 @@ export function generateInterQuestions(count: number): Question[] {
     "inter",
     SUBJECT,
     getInterTemplates(),
-    Math.min(80, count)
+    Math.min(60, count)
   );
-  const parametric = generateParametricInterBatch(Math.max(count, 800));
+  const parametric = generateParametricInterBatch(Math.max(count, 400));
   const merged = filterQualityQuestions([...statics, ...templates, ...parametric]);
   return finalizeQuestions(merged, count);
 }
