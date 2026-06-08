@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
-import { setupDevPlatform } from "@cloudflare/next-on-pages/next-dev";
 import path from "path";
 import { fileURLToPath } from "url";
-
-if (process.env.NODE_ENV === "development") {
-  void setupDevPlatform();
-}
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
@@ -13,6 +8,11 @@ const storeFsStubPath = path.join(projectRoot, "src/lib/questions/store.fs.stub.
 const storeFsPath = path.join(projectRoot, "src/lib/questions/store.fs.ts");
 
 const nextConfig: NextConfig = {
+  output: "export",
+  outputFileTracingRoot: projectRoot,
+  images: {
+    unoptimized: true,
+  },
   webpack: (config) => {
     config.resolve ??= {};
     config.resolve.alias ??= {};
