@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCategoryBySlug } from "@/data/categories";
 import { STATIC_QUESTION_COUNTS } from "@/data/questionCounts";
@@ -39,11 +39,9 @@ const MINIGAMES_BY_CATEGORY: Record<
   "match-analyst": [],
 };
 
-interface CategoryPageClientProps {
-  slug: string;
-}
-
-export default function CategoryPageClient({ slug }: CategoryPageClientProps) {
+export default function CategoryPageClient() {
+  const params = useParams();
+  const slug = params.slug as string;
   const router = useRouter();
   const { player, loading } = usePlayer();
   const counts = useQuestionCounts();

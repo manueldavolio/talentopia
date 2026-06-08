@@ -6,7 +6,7 @@ export function getRandomQuestions(
   count: number
 ): never {
   throw new Error(
-    `getRandomQuestions è deprecato. Usa fetch('/api/questions/random?category=${categorySlug}&count=${count}').`
+    `getRandomQuestions è deprecato. Usa pickClientQuestions({ categorySlug: '${categorySlug}', count: ${count} }).`
   );
 }
 

@@ -1,8 +1,6 @@
 import { QUESTION_BANK_SLUGS } from "@/lib/questions/categorySlugs";
 import QuizPageClient from "./QuizPageClient";
 
-export const dynamicParams = false;
-
 export function generateStaticParams() {
   return QUESTION_BANK_SLUGS.map((id) => ({ id }));
 }
