@@ -7,6 +7,11 @@ export function generateStaticParams() {
   return CATEGORIES.map((category) => ({ slug: category.slug }));
 }
 
-export default function CategoryPage() {
-  return <CategoryPageClient />;
+type PageProps = {
+  params: Promise<{ slug: string }>;
+};
+
+export default async function CategoryPage({ params }: PageProps) {
+  const { slug } = await params;
+  return <CategoryPageClient slug={slug} />;
 }

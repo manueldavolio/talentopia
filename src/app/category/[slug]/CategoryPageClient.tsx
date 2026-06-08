@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCategoryBySlug } from "@/data/categories";
+import { STATIC_QUESTION_COUNTS } from "@/data/questionCounts";
 import { GameButton } from "@/components/ui/GameButton";
 import { RouteFallback } from "@/components/ui/RouteFallback";
 import { usePlayer } from "@/context/PlayerContext";
@@ -38,16 +39,26 @@ const MINIGAMES_BY_CATEGORY: Record<
   "match-analyst": [],
 };
 
-export default function CategoryPageClient() {
-  const params = useParams();
+interface CategoryPageClientProps {
+  slug: string;
+}
+
+export default function CategoryPageClient({ slug }: CategoryPageClientProps) {
   const router = useRouter();
-  const slug = params.slug as string;
-  const { player } = usePlayer();
+  const { player, loading } = usePlayer();
   const counts = useQuestionCounts();
 
   useEffect(() => {
     if (slug === "corsi") router.replace("/courses");
   }, [slug, router]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <p className="text-lg animate-pulse text-white/70">Caricamento categoria...</p>
+      </div>
+    );
+  }
 
   const category = getCategoryBySlug(slug);
 
@@ -63,9 +74,10 @@ export default function CategoryPageClient() {
     );
   }
 
-  const count = counts?.[slug as CategorySlug];
-  const minigames = MINIGAMES_BY_CATEGORY[slug] || [];
   const categorySlug = slug as CategorySlug;
+  const count =
+    counts[categorySlug] ?? STATIC_QUESTION_COUNTS[categorySlug];
+  const minigames = MINIGAMES_BY_CATEGORY[slug] ?? [];
   const rating = getCategoryRating(player, categorySlug);
   const mix = expectedDifficultyMix(rating);
 
